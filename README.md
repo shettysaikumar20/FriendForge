@@ -49,8 +49,9 @@ A learner can upload study material, ask questions about it, simplify difficult 
 | ☁️ **Online Study** | Full RAG, memory, quiz, revision, and voice workflow |
 | 💻 **Local AI** | Runs Gemma 3 4B locally through Ollama |
 | 🔐 **Capability Isolation** | Local mode does not silently fall back to hosted AI |
+| 🌓 **Dark & Light Mode** | Seamless theme switching for comfortable day and night study sessions |
 | 📱 **Responsive Interface** | Chat-first experience across desktop, tablet, and mobile layouts |
-| 🛡️ **Production Access Gate** | Shared-password protection for the deployed study space |
+| 🛡️ **Production Access Gate** | Shared-password protection (`HACKTOBERFEST2026!`) for the deployed study space |
 
 ---
 
@@ -346,10 +347,15 @@ The repository excludes private `.env` files through `.gitignore`.
 Production also supports a shared study-space password through:
 
 ```env
-APP_PASSWORD=
+APP_PASSWORD=HACKTOBERFEST2026!
 ```
 
 The password gate prevents casual public access to a deployed FriendForge instance.
+The default live password for the study space is:
+
+> **Shared Password:** `HACKTOBERFEST2026!`
+
+Visitors and reviewers can enter this password (or click the built-in **Auto-fill** hint pill on the lock screen) to unlock the study space.
 
 > FriendForge currently provides one shared study space rather than separate user accounts.
 
@@ -471,7 +477,7 @@ Switch FriendForge to **Local AI** and it will check whether the local runtime i
 | `ELEVENLABS_API_KEY` | Backend-only ElevenLabs credential |
 | `ELEVENLABS_VOICE_ID` | Optional voice selection |
 | `ELEVENLABS_TTS_MODEL` | Optional ElevenLabs TTS model |
-| `APP_PASSWORD` | Shared production study-space password |
+| `APP_PASSWORD` | Shared production study-space password (default: `HACKTOBERFEST2026!`) |
 | `OLLAMA_URL` | Local Ollama endpoint |
 | `OLLAMA_MODEL` | Local model identifier |
 | `PORT` | Backend listening port |
@@ -552,7 +558,7 @@ Typical production configuration requires:
 ```env
 BACKBOARD_API_KEY=
 ELEVENLABS_API_KEY=
-APP_PASSWORD=
+APP_PASSWORD=HACKTOBERFEST2026!
 ```
 
 ### Important Local AI distinction

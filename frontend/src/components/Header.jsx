@@ -1,8 +1,10 @@
 import React from 'react';
-import { Zap, Cpu, Wifi } from 'lucide-react';
+import { Zap, Cpu, Wifi, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../useTheme';
 
 export default function Header({ activeModel, aiMode = 'online', onSelectAiMode = () => {}, localStatus = {} }) {
   const isOnline = aiMode === 'online';
+  const { isDark, toggleTheme } = useTheme();
   
   const onlineModelText = activeModel 
     ? `Open-weight AI • ${activeModel.name || 'meta-llama/llama-3.1-8b-instruct'} • Backboard`
@@ -51,6 +53,16 @@ export default function Header({ activeModel, aiMode = 'online', onSelectAiMode 
           ></span>
           <span className="badge-text">{isOnline ? onlineModelText : localModelText}</span>
         </div>
+
+        <button
+          type="button"
+          className="theme-toggle-btn header-theme-btn"
+          onClick={toggleTheme}
+          aria-label={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
+          title={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
+        >
+          {isDark ? <Sun size={15} /> : <Moon size={15} />}
+        </button>
       </div>
     </header>
   );

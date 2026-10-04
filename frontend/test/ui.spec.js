@@ -317,3 +317,98 @@ Use \`npm install\` to get started.
   await expect(page.locator('.user-bubble')).toHaveText('What is open source contribution?');
 });
 
+test('AccessGate: lock screen centered UI, autofill password, and Dark/Light mode toggle', async ({ page }) => {
+  let authenticated = false;
+
+  await page.route('**/api/**', async route => {
+    const url = new URL(route.request().url());
+    const path = url.pathname;
+    if (path === '/api/session') {
+      if (route.request().method() === 'POST') {
+        const body = route.request().postDataJSON();
+        if (body.password === 'HACKTOBERFEST2026!') {
+          authenticated = true;
+          await route.fulfill({ json: { success: true, message: 'Authenticated' } });
+        } else {
+          await route.fulfill({ status: 401, json: { success: false, message: 'That study password is not correct.' } });
+        }
+      } else {
+        await route.fulfill({
+          json: { authenticated, passwordRequired: true }
+        });
+      }
+    } else if (path === '/api/health') {
+      await route.fulfill({ json: { status: 'ok', service: 'FriendForge API' } });
+    } else if (path === '/api/config') {
+      await route.fulfill({ json: { model: { name: 'meta-llama/llama-3.1-8b-instruct', provider: 'openrouter', openWeight: true } } });
+    } else if (path === '/api/local-ai/status') {
+      await route.fulfill({ json: { available: true, provider: 'ollama', model: 'gemma3:4b', local: true } });
+    } else if (path === '/api/memory') {
+      await route.fulfill({ json: { success: true, memories: [] } });
+    } else {
+      await route.fulfill({ json: { success: true } });
+    }
+  });
+
+  await page.goto('/');
+
+  // 1. Verify Access Gate is visible and centered
+  const accessCard = page.locator('.access-card');
+  await expect(accessCard).toBeVisible();
+  await expect(page.getByText('Shared study password')).toBeVisible();
+
+  // 2. Test theme toggle on the gate
+  const gateThemeBtn = accessCard.locator('.theme-toggle-btn');
+  await expect(gateThemeBtn).toBeVisible();
+  
+  // Initially dark (or default)
+  const initialTheme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+  expect(initialTheme).toBe('dark');
+
+  // Click theme toggle -> switch to light
+  await gateThemeBtn.click();
+  const lightTheme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+  expect(lightTheme).toBe('light');
+
+  // Click again -> switch back to dark
+  await gateThemeBtn.click();
+  const darkThemeAgain = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+  expect(darkThemeAgain).toBe('dark');
+
+  // 3. Test wrong password
+  const passwordInput = page.locator('#study-password');
+  await passwordInput.fill('wrongpassword');
+  await page.getByRole('button', { name: 'Open study space' }).click();
+  await expect(page.getByRole('alert')).toContainText('That study password is not correct.');
+
+  // 4. Test Autofill hint pill with HACKTOBERFEST2026!
+  const hintPill = page.locator('.access-hint-pill');
+  await expect(hintPill).toBeVisible();
+  await expect(hintPill).toContainText('HACKTOBERFEST2026!');
+  await hintPill.click();
+
+  // Input should now have HACKTOBERFEST2026!
+  await expect(passwordInput).toHaveValue('HACKTOBERFEST2026!');
+
+  // 5. Test password visibility toggle
+  const revealBtn = page.locator('.password-reveal-btn');
+  await expect(passwordInput).toHaveAttribute('type', 'password');
+  await revealBtn.click();
+  await expect(passwordInput).toHaveAttribute('type', 'text');
+  await revealBtn.click();
+  await expect(passwordInput).toHaveAttribute('type', 'password');
+
+  // 6. Sign in successfully
+  await page.getByRole('button', { name: 'Open study space' }).click();
+
+  // 7. Verify study space unlocks
+  await expect(page.getByRole('button', { name: 'Online Study' })).toBeVisible();
+
+  // 8. Test Header theme toggle inside study space
+  const headerThemeBtn = page.locator('.header-theme-btn');
+  await expect(headerThemeBtn).toBeVisible();
+  await headerThemeBtn.click();
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe('light');
+});
+
+
