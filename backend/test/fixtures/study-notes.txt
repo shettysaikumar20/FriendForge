@@ -1,0 +1,13 @@
+FriendForge Test Study Notes
+
+Database normalization reduces data redundancy.
+
+First Normal Form (1NF) requires atomic values and removes repeating groups.
+
+Second Normal Form (2NF) requires 1NF and removes partial dependency on a composite key.
+
+Third Normal Form (3NF) requires 2NF and removes transitive dependencies.
+
+The test code for this document is FF-RAG-2026.
+
+This file exists only for RAG verification.

@@ -1,0 +1,9 @@
+const assert=require('node:assert/strict');const path=require('node:path');require('dotenv').config({path:path.join(__dirname,'../.env')});
+const service=require('../src/services/backboardService');const modes=require('../src/services/studyModes');
+(async()=>{const c=await service.getClient();const a=await c.createAssistant({name:'FriendForge mode verification '+Date.now()});process.env.BACKBOARD_ASSISTANT_ID=a.assistantId;
+try{const doc=await service.uploadStudyDocument({filePath:path.join(__dirname,'../test/fixtures/study-notes.txt'),originalName:'test-notes.txt'});for(let attempt=0;attempt<60 && doc.status!=='indexed';attempt++){await new Promise(r=>setTimeout(r,2000));const status=await service.getStudyDocumentStatus(doc.documentId);doc.status=status.status;if(['failed','error'].includes(doc.status))break;} assert.equal(doc.status,'indexed');
+const original=service.sendChatMessage;service.sendChatMessage=async(args)=>{const res=await original(args);if(args.instructions?.startsWith('You format')) console.log('Quiz response received; checking validity');return res;};
+const quiz=await modes.generate({message:'Quiz me on normalization using my uploaded notes. Use DBMS as subject and Normalization as topic for all five questions.',threadId:doc.threadId,hasDocuments:true});
+let score=0;for(let index=0;index<5;index++){const r=await modes.answer(quiz.quiz.id,index,0);score+=Number(r.correct);if(index===4){assert.equal(r.score,score);assert.ok(!r.memoryWarning);console.log('PASS score and memory',r.memoryUpdated);}}
+const revision=await modes.revise({threadId:doc.threadId,hasDocuments:true});assert.ok(revision.revisionTopic);console.log('PASS revision');
+}finally{await c.deleteAssistant(a.assistantId);}})().catch(e=>{console.error('FAIL',e.name, ['Invalid quiz','Quiz retrieval unavailable'].includes(e.message)?e.message:'Request or assertion failed');process.exitCode=1;});

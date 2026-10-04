@@ -1,0 +1,10 @@
+DEMO CONTENT ? FriendForge
+Not real friend data.
+
+DBMS: Normalization
+Normalization reduces data redundancy.
+1NF requires atomic values and removes repeating groups.
+2NF requires 1NF and removes partial dependencies on composite keys.
+3NF requires 2NF and removes transitive dependencies.
+
+Try: Explain 2NF. Then ask for a quiz on normalization.

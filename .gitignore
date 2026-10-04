@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Temporary uploads & storage
+uploads/
+temp/
+backend/uploads/
+backend/temp/
+friendforge-rag-test.txt
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Runtime identity and private configuration
+backend/data/
+.env.*
+!.env.example
+secrets/
+
+.npm-cache/
+playwright-report/
+test-results/
+
+# Local coding-agent configuration
+.agents/
