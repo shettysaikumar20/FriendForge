@@ -1,0 +1,13 @@
+# FriendForge does not require Python packages.
+#
+# Backend: Node.js / Express
+# Frontend: React / Vite
+#
+# JavaScript dependencies are defined in:
+#   backend/package.json
+#   frontend/package.json
+#
+# Local AI requirement:
+#   Ollama with Gemma 3 4B (gemma3:4b)
+#
+# Ollama is installed separately and is not a Python package.
