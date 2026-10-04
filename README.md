@@ -34,6 +34,14 @@ A learner can upload study material, ask questions about it, simplify difficult 
 > **The goal isn't only to answer a question. It's to help the learner understand it, test it, and come back to what they haven't mastered yet.**
 
 ---
+🔗 LIVE DEMO
+https://friendforge-gbqq.onrender.com
+
+Demo Password:
+HACKTOBERFEST2026!
+
+💻 SOURCE CODE
+https://github.com/shettysaikumar20/FriendForge
 
 ## 🌟 Key Features
 
