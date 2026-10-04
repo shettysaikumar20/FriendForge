@@ -233,3 +233,87 @@ test('ElevenLabs TTS: explicit click, audio playback controls, duplicate prevent
   // 10. Local response also has privacy notice and zero TTS calls
   expect(ttsCalls).toBe(1); // Never called by Local AI
 });
+
+test('Markdown rendering in assistant messages: bold, lists, code, and security', async ({ page }) => {
+  const markdownResponse = `**Open Source Contribution:**
+
+Open-source contributions can include:
+
+1. **Code contributions**
+   - Fix bugs
+   - Add features
+
+2. **Documentation**
+   - Improve README
+   - Write guides
+
+Use \`npm install\` to get started.
+
+<script>window.__xss_detected = true;</script>`;
+
+  await page.route('**/api/**', async route => {
+    const url = new URL(route.request().url());
+    const path = url.pathname;
+    if (path === '/api/session') {
+      await route.fulfill({ json: { authenticated: true, passwordRequired: false } });
+    } else if (path === '/api/health') {
+      await route.fulfill({ json: { status: 'ok', service: 'FriendForge API' } });
+    } else if (path === '/api/config') {
+      await route.fulfill({ json: { model: { name: 'meta-llama/llama-3.1-8b-instruct', provider: 'openrouter', openWeight: true } } });
+    } else if (path === '/api/local-ai/status') {
+      await route.fulfill({ json: { available: true, provider: 'ollama', model: 'gemma3:4b', local: true } });
+    } else if (path === '/api/chat') {
+      await route.fulfill({
+        json: {
+          success: true,
+          content: markdownResponse,
+          model: { name: 'meta-llama/llama-3.1-8b-instruct' }
+        }
+      });
+    } else if (path === '/api/memory') {
+      await route.fulfill({ json: { success: true, memories: [] } });
+    } else {
+      await route.fulfill({ json: { success: true } });
+    }
+  });
+
+  await page.goto('/');
+
+  // Send message
+  const input = page.getByLabel('Study question or quiz topic');
+  await input.fill('What is open source contribution?');
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
+
+  // 1. Verify Bold is rendered as strong element and literal ** is not present
+  const boldHeader = page.locator('.assistant-content-body strong').filter({ hasText: 'Open Source Contribution:' });
+  await expect(boldHeader).toBeVisible();
+  await expect(page.locator('.assistant-content-body')).not.toContainText('**Open Source Contribution:**');
+
+  // 2. Verify Ordered list elements
+  const orderedItems = page.locator('.assistant-content-body ol > li');
+  await expect(orderedItems.first()).toBeVisible();
+  expect(await orderedItems.count()).toBeGreaterThanOrEqual(2);
+
+  // 3. Verify Bullet list elements
+  const bulletItems = page.locator('.assistant-content-body ul > li');
+  await expect(bulletItems.first()).toBeVisible();
+  expect(await bulletItems.count()).toBeGreaterThanOrEqual(4);
+
+  // 4. Verify nested list items
+  const nestedLi = page.locator('.assistant-content-body ol > li ul > li');
+  await expect(nestedLi.filter({ hasText: 'Fix bugs' })).toBeVisible();
+  await expect(nestedLi.filter({ hasText: 'Add features' })).toBeVisible();
+
+  // 5. Verify Inline code
+  const inlineCode = page.locator('.assistant-content-body code').filter({ hasText: 'npm install' });
+  await expect(inlineCode).toBeVisible();
+
+  // 6. Security: Verify raw script tag did not execute
+  const xssDetected = await page.evaluate(() => window.__xss_detected);
+  expect(xssDetected).toBeUndefined();
+  expect(await page.locator('.assistant-content-body script').count()).toBe(0);
+
+  // 7. Verify user message is plain text
+  await expect(page.locator('.user-bubble')).toHaveText('What is open source contribution?');
+});
+

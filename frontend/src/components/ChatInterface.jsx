@@ -3,6 +3,8 @@ import { Send, User, Zap, Cpu, FileText } from 'lucide-react';
 import ExplanationAudioPlayer from './ExplanationAudioPlayer';
 import WelcomeSection from './WelcomeSection';
 import StudyModes from './StudyModes';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function ChatInterface({ 
   messages, 
@@ -73,8 +75,25 @@ export default function ChatInterface({
                       )}
                     </div>
 
-                    <div className="assistant-content-body">
-                      {msg.content}
+                    <div className="assistant-content-body markdown-body">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          a: ({ href, children, ...props }) => {
+                            const isSafe = /^https?:\/\//i.test(href || '') || /^\//.test(href || '') || /^#/.test(href || '');
+                            if (!isSafe) {
+                              return <span>{children}</span>;
+                            }
+                            return (
+                              <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                                {children}
+                              </a>
+                            );
+                          }
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
                     </div>
 
                     {/* Retrieved Sources Citation Badge */}
