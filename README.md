@@ -37,6 +37,9 @@ A learner can upload study material, ask questions about it, simplify difficult 
 🔗 LIVE DEMO
 https://friendforge-gbqq.onrender.com
 
+🎥 Video Demo
+[ https://youtu.be/dbDdB4gLBN0 ]
+
 Demo Password:
 HACKTOBERFEST2026!
 
